@@ -44,7 +44,25 @@ def extract_names(filename):
     ['2006', 'Aaliyah 91', 'Aaron 57', 'Abagail 895', ...]
     """
     names = []
-    # +++your code here+++
+    with open(filename, 'r') as f:
+        contents = f.readlines()
+
+    year = re.compile(r'Popularity\sin\s(\d\d\d\d)')
+    name = re.compile(r'<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>')
+    name_dict = {}
+
+    for file_lines in contents:
+        if 'Popularity in ' in reversed(file_lines):
+            extracted_year = year.search(file_lines)
+            names.append(extracted_year.group(0)[14:18])
+        else:
+            extracted_name = name.findall(file_lines)
+            if extracted_name:
+                name_dict[extracted_name[0][1]] = extracted_name[0][0]
+                name_dict[extracted_name[0][2]] = extracted_name[0][0]
+                names.append(extracted_name)
+    names = [x + ' ' + name_dict[x] for x in name_dict]
+    names = sorted(names)
     return names
 
 
@@ -82,7 +100,16 @@ def main(args):
     # Use the create_summary flag to decide whether to print the list
     # or to write the list to a summary file (e.g. `baby1990.html.summary`).
 
-    # +++your code here+++
+    if create_summary:
+        for filename in file_list:
+            names = extract_names(filename)
+            with open(filename + '.summary', 'w') as f:
+                f.write('\n'.join(names))
+
+    else:
+        for filename in file_list:
+            names = extract_names(filename)
+            print('\n'.join(names))
 
 
 if __name__ == '__main__':
